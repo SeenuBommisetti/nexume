@@ -2,14 +2,23 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000
 
 export interface ResumeDetail {
   filename: string;
-  file_size: number;
   page_count: number;
   word_count: number;
   text: string;
 }
 
+export interface ResumeAnalysis {
+  overall_score: number;
+  summary: string;
+  strengths: string[];
+  weaknesses: string[];
+  missing_skills: string[];
+  recommendations: string[];
+}
+
 export interface ResumeUploadResponse {
   resume: ResumeDetail;
+  analysis: ResumeAnalysis;
 }
 
 export async function uploadResume(

@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 import { checkBackendHealth, type HealthResponse } from '@/services/api'
 import { Button } from '@/components/ui/button'
 import { ResumeUpload } from '@/components/ResumeUpload'
-import { type ResumeDetail } from '@/services/resume'
+import { ResumeAnalysisDashboard } from '@/components/ResumeAnalysisDashboard'
+import { type ResumeUploadResponse } from '@/services/resume'
 import { 
   AlertCircle, 
   CheckCircle, 
@@ -10,11 +11,7 @@ import {
   Sparkles, 
   Terminal, 
   FileText, 
-  Cpu, 
-  Eye, 
-  EyeOff, 
-  Layers, 
-  Info 
+  Cpu
 } from 'lucide-react'
 
 function App() {
@@ -23,9 +20,9 @@ function App() {
   const [healthError, setHealthError] = useState<string | null>(null)
 
   // Upload integration states
-  const [parsedResume, setParsedResume] = useState<ResumeDetail | null>(null)
+  const [uploadResult, setUploadResult] = useState<ResumeUploadResponse | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [showDebugPreview, setShowDebugPreview] = useState<boolean>(true)
+  const [isProcessing, setIsProcessing] = useState<boolean>(false)
 
   const verifyHealth = async () => {
     setLoadingHealth(true)
@@ -46,30 +43,36 @@ function App() {
   }, [])
 
   const handleUploadStart = () => {
+    setIsProcessing(true)
     setUploadError(null)
-    setParsedResume(null)
+    setUploadResult(null)
   }
 
-  const handleUploadSuccess = (resume: ResumeDetail) => {
-    setParsedResume(resume)
-  }
+  // const handleUploadSuccess = (result: ResumeUploadResponse) => {
+  //   setUploadResult(result)
+  //   setIsProcessing(false)
+  // }
+
+
+  const handleUploadSuccess = (result: ResumeUploadResponse) => {
+    console.log("=== UPLOAD RESULT ===");
+    console.log(result);
+    console.log("resume:", result.resume);
+    console.log("analysis:", result.analysis);
+
+    setUploadResult(result);
+    setIsProcessing(false);
+  };
 
   const handleUploadError = (error: string) => {
     setUploadError(error)
+    setIsProcessing(false)
   }
 
   const handleReset = () => {
-    setParsedResume(null)
+    setUploadResult(null)
     setUploadError(null)
-  }
-
-  // Format bytes helper
-  const formatBytes = (bytes: number) => {
-    if (bytes === 0) return '0 Bytes'
-    const k = 1024
-    const sizes = ['Bytes', 'KB', 'MB']
-    const i = Math.floor(Math.log(bytes) / Math.log(k))
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i]
+    setIsProcessing(false)
   }
 
   return (
@@ -91,7 +94,7 @@ function App() {
             Nexume
           </h1>
           <p className="text-neutral-400 max-w-md text-sm sm:text-base">
-            Upload your resume, parse structural text using PyMuPDF, and verify API data pipeline integration.
+            Upload your resume, parse structural text with PyMuPDF, and receive detailed AI analysis via the Gemini engine.
           </p>
         </header>
 
@@ -107,7 +110,7 @@ function App() {
               disabled={loadingHealth}
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs border-neutral-800 bg-neutral-950/40 hover:bg-neutral-800 hover:text-white"
+              className="h-8 px-2.5 text-xs border-neutral-800 bg-neutral-950/40 hover:bg-neutral-850 hover:text-white"
             >
               <RefreshCw className={`w-3 h-3 mr-1.5 ${loadingHealth ? 'animate-spin' : ''}`} />
               Re-check
@@ -150,118 +153,48 @@ function App() {
           </div>
         </section>
 
-        {/* Upload Container */}
+        {/* Upload Container (Hidden if analysis result is available) */}
         <main className="flex flex-col gap-6">
-          <section className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl">
-            <div className="flex flex-col gap-1">
-              <h2 className="text-lg font-bold text-neutral-200">Resume File Upload</h2>
-              <p className="text-xs text-neutral-500">Upload your PDF resume to extract its text contents.</p>
-            </div>
-
-            <ResumeUpload 
-              onUploadStart={handleUploadStart}
-              onUploadSuccess={handleUploadSuccess}
-              onUploadError={handleUploadError}
-              onReset={handleReset}
-            />
-
-            {uploadError && (
-              <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-xl flex items-start gap-2.5 text-xs">
-                <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                <span className="leading-relaxed">{uploadError}</span>
-              </div>
-            )}
-          </section>
-
-          {/* TEMPORARY DEBUG EXTRACTION PREVIEW VIEW */}
-          {parsedResume && (
-            <section className="bg-neutral-900/40 border border-neutral-800 rounded-2xl p-6 flex flex-col gap-4 shadow-xl transition-all duration-300">
-              <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1 rounded bg-purple-500/10 text-purple-400">
-                    <Layers className="w-4 h-4" />
-                  </div>
-                  <h2 className="text-sm font-semibold text-neutral-200">PyMuPDF Debug Text View</h2>
-                </div>
-                
-                <Button
-                  onClick={() => setShowDebugPreview(!showDebugPreview)}
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 text-neutral-400 hover:text-neutral-200 hover:bg-neutral-800 text-xs px-2.5"
-                >
-                  {showDebugPreview ? (
-                    <>
-                      <EyeOff className="w-3.5 h-3.5 mr-1.5" />
-                      Hide Text
-                    </>
-                  ) : (
-                    <>
-                      <Eye className="w-3.5 h-3.5 mr-1.5" />
-                      Show Text
-                    </>
-                  )}
-                </Button>
+          {!uploadResult && (
+            <section className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl">
+              <div className="flex flex-col gap-1">
+                <h2 className="text-lg font-bold text-neutral-200">Resume File Upload</h2>
+                <p className="text-xs text-neutral-500">Upload your PDF resume to run the AI compatibility analysis.</p>
               </div>
 
-              {/* Metadata Indicators Grid */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-850 flex flex-col gap-0.5">
-                  <span className="text-[10px] text-neutral-500 font-medium">FILE NAME</span>
-                  <span className="text-xs font-semibold text-neutral-200 truncate" title={parsedResume.filename}>
-                    {parsedResume.filename}
-                  </span>
-                </div>
-                <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-850 flex flex-col gap-0.5">
-                  <span className="text-[10px] text-neutral-500 font-medium">FILE SIZE</span>
-                  <span className="text-xs font-semibold text-neutral-200">
-                    {formatBytes(parsedResume.file_size)}
-                  </span>
-                </div>
-                <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-850 flex flex-col gap-0.5">
-                  <span className="text-[10px] text-neutral-500 font-medium">PAGES</span>
-                  <span className="text-xs font-semibold text-neutral-200">
-                    {parsedResume.page_count} page{parsedResume.page_count > 1 ? 's' : ''}
-                  </span>
-                </div>
-                <div className="bg-neutral-950/60 rounded-xl p-3 border border-neutral-850 flex flex-col gap-0.5">
-                  <span className="text-[10px] text-neutral-500 font-medium">EST. WORD COUNT</span>
-                  <span className="text-xs font-semibold text-neutral-200">
-                    {parsedResume.word_count} words
-                  </span>
-                </div>
-              </div>
+              <ResumeUpload 
+                onUploadStart={handleUploadStart}
+                onUploadSuccess={handleUploadSuccess}
+                onUploadError={handleUploadError}
+                onReset={handleReset}
+              />
 
-              {/* Scrollable Text Box */}
-              {showDebugPreview && (
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-neutral-950/40 border border-neutral-850 text-neutral-400 text-[10px] font-mono leading-relaxed">
-                    <Info className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                    <span>This debug window acts as a temporary visualization layer and will be swapped with the AI analysis dashboard in Step 3.</span>
-                  </div>
-                  
-                  <div className="w-full max-h-[350px] overflow-y-auto bg-neutral-950 rounded-xl border border-neutral-850 p-4 font-mono text-xs text-neutral-300 leading-relaxed scrollbar-thin scrollbar-thumb-neutral-800 scrollbar-track-transparent">
-                    {parsedResume.text.trim() ? (
-                      <pre className="whitespace-pre-wrap break-words selection:bg-purple-500/40">
-                        {parsedResume.text}
-                      </pre>
-                    ) : (
-                      <span className="italic text-neutral-600">No readable text found in PDF layout stream.</span>
-                    )}
-                  </div>
+              {uploadError && (
+                <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-xl flex items-start gap-2.5 text-xs">
+                  <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
+                  <span className="leading-relaxed">{uploadError}</span>
                 </div>
               )}
             </section>
           )}
 
-          {/* Core Clean Architecture Indicators */}
-          {!parsedResume && (
+          {/* Recruiter Review Dashboard Section */}
+          {uploadResult && (
+            <ResumeAnalysisDashboard 
+              resume={uploadResult.resume}
+              analysis={uploadResult.analysis}
+              onReset={handleReset}
+            />
+          )}
+
+          {/* Clean Architecture Preview Section */}
+          {!uploadResult && !isProcessing && (
             <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="bg-neutral-900/20 border border-neutral-850 rounded-xl p-5 flex flex-col gap-3">
                 <div className="p-2 w-fit rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
                   <FileText className="w-4 h-4" />
                 </div>
-                <h3 className="font-semibold text-xs text-neutral-200">PDFParser (PyMuPDF)</h3>
+                <h3 className="font-semibold text-xs text-neutral-200">PDFExtractor (PyMuPDF)</h3>
                 <p className="text-[11px] text-neutral-400 leading-relaxed">
                   Processes and validates PDF structures inside a dedicated utility package without polluting services or routes.
                 </p>

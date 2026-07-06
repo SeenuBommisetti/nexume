@@ -48,7 +48,7 @@ export function ResumeUpload({ onUploadSuccess, onUploadStart, onUploadError, on
         }
       })
       setStatus('idle')
-      onUploadSuccess(result.resume)
+      onUploadSuccess(result)
     } catch (err: any) {
       handleLocalError(err.message || 'An unexpected error occurred during upload.')
     }

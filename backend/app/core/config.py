@@ -26,6 +26,7 @@ class Settings(BaseSettings):
         raise ValueError(v)
 
     GEMINI_API_KEY: str = ""
+    GEMINI_MODEL: str = "gemini-2.5-flash"
 
     model_config = SettingsConfigDict(
         env_file=".env",
