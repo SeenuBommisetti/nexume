@@ -11,17 +11,15 @@ import {
   EyeOff, 
   FileText, 
   Cpu, 
-  RotateCcw,
   Sparkles
 } from 'lucide-react'
 
 interface ResumeAnalysisDashboardProps {
   resume: ResumeDetail
   analysis: ResumeAnalysis
-  onReset: () => void
 }
 
-export function ResumeAnalysisDashboard({ resume, analysis, onReset }: ResumeAnalysisDashboardProps) {
+export function ResumeAnalysisDashboard({ resume, analysis }: ResumeAnalysisDashboardProps) {
   const [showDebugText, setShowDebugText] = useState(false)
   const score = analysis.overall_score
 
@@ -121,16 +119,6 @@ export function ResumeAnalysisDashboard({ resume, analysis, onReset }: ResumeAna
               <div><span className="text-neutral-500">pages:</span> {resume.page_count}</div>
               <div><span className="text-neutral-500">words:</span> {resume.word_count}</div>
             </div>
-            
-            <Button
-              onClick={onReset}
-              variant="outline"
-              size="sm"
-              className="h-8 px-3 text-xs border-neutral-800 bg-neutral-950/20 hover:bg-neutral-850 hover:text-white"
-            >
-              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
-              Upload New
-            </Button>
           </div>
         </div>
       </section>
@@ -223,12 +211,12 @@ export function ResumeAnalysisDashboard({ resume, analysis, onReset }: ResumeAna
         </ul>
       </section>
 
-      {/* Accordion Collapsible Raw Text Debug Area */}
+      {/* Collapsible Raw Text Area */}
       <section className="bg-neutral-900/10 border border-neutral-800 rounded-2xl p-5 flex flex-col gap-3 shadow-inner">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-neutral-400">
             <FileText className="w-4 h-4" />
-            <span className="text-xs font-semibold">Raw Extracted Text (PyMuPDF Debug)</span>
+            <span className="text-xs font-semibold">Extracted Resume Text</span>
           </div>
           <Button
             onClick={() => setShowDebugText(!showDebugText)}
@@ -239,12 +227,12 @@ export function ResumeAnalysisDashboard({ resume, analysis, onReset }: ResumeAna
             {showDebugText ? (
               <>
                 <EyeOff className="w-3.5 h-3.5 mr-1.5" />
-                Hide Debug
+                Hide Text
               </>
             ) : (
               <>
                 <Eye className="w-3.5 h-3.5 mr-1.5" />
-                Show Debug
+                Show Text
               </>
             )}
           </Button>
@@ -254,7 +242,7 @@ export function ResumeAnalysisDashboard({ resume, analysis, onReset }: ResumeAna
           <div className="flex flex-col gap-3 animate-fade-in">
             <div className="flex items-center gap-1.5 px-3 py-2 rounded-lg bg-neutral-950/40 border border-neutral-850 text-neutral-400 text-[10px] font-mono leading-normal">
               <Info className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-              <span>This panel displays the raw text extraction output generated before sending it to the AI Analysis Service.</span>
+              <span>This panel displays the raw text parsed from the uploaded PDF document.</span>
             </div>
             <div className="w-full max-h-[220px] overflow-y-auto bg-neutral-950 rounded-xl border border-neutral-850 p-4 font-mono text-[11px] text-neutral-400 leading-relaxed">
               <pre className="whitespace-pre-wrap break-words">{resume.text}</pre>

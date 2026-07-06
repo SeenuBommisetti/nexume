@@ -1,167 +1,94 @@
-import { useEffect, useState } from 'react'
-import { checkBackendHealth, type HealthResponse } from '@/services/api'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { ResumeUpload } from '@/components/ResumeUpload'
 import { ResumeAnalysisDashboard } from '@/components/ResumeAnalysisDashboard'
 import { type ResumeUploadResponse } from '@/services/resume'
+import { Button } from '@/components/ui/button'
 import { 
-  AlertCircle, 
-  CheckCircle, 
-  RefreshCw, 
-  Sparkles, 
-  Terminal, 
   FileText, 
-  Cpu
+  Cpu, 
+  TrendingUp, 
+  Sparkles, 
+  RotateCcw, 
+  Shield 
 } from 'lucide-react'
 
 function App() {
-  const [health, setHealth] = useState<HealthResponse | null>(null)
-  const [loadingHealth, setLoadingHealth] = useState<boolean>(true)
-  const [healthError, setHealthError] = useState<string | null>(null)
-
   // Upload integration states
   const [uploadResult, setUploadResult] = useState<ResumeUploadResponse | null>(null)
   const [uploadError, setUploadError] = useState<string | null>(null)
-  const [isProcessing, setIsProcessing] = useState<boolean>(false)
-
-  const verifyHealth = async () => {
-    setLoadingHealth(true)
-    setHealthError(null)
-    try {
-      const data = await checkBackendHealth()
-      setHealth(data)
-    } catch (err: any) {
-      setHealthError(err.message || 'Failed to connect to backend')
-      setHealth(null)
-    } finally {
-      setLoadingHealth(false)
-    }
-  }
-
-  useEffect(() => {
-    verifyHealth()
-  }, [])
 
   const handleUploadStart = () => {
-    setIsProcessing(true)
     setUploadError(null)
     setUploadResult(null)
   }
 
-  // const handleUploadSuccess = (result: ResumeUploadResponse) => {
-  //   setUploadResult(result)
-  //   setIsProcessing(false)
-  // }
-
-
   const handleUploadSuccess = (result: ResumeUploadResponse) => {
-    console.log("=== UPLOAD RESULT ===");
-    console.log(result);
-    console.log("resume:", result.resume);
-    console.log("analysis:", result.analysis);
-
-    setUploadResult(result);
-    setIsProcessing(false);
-  };
+    setUploadResult(result)
+  }
 
   const handleUploadError = (error: string) => {
     setUploadError(error)
-    setIsProcessing(false)
   }
 
   const handleReset = () => {
     setUploadResult(null)
     setUploadError(null)
-    setIsProcessing(false)
   }
 
   return (
-    <div className="min-h-screen bg-[#09090b] text-neutral-100 font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col items-center justify-start py-12 px-6 relative overflow-hidden">
-      {/* Glow Backdrops */}
+    <div className="min-h-screen bg-[#09090b] text-neutral-100 font-sans selection:bg-purple-500/30 selection:text-purple-200 flex flex-col items-center justify-start pb-16 relative overflow-hidden">
+      
+      {/* Decorative Glow Backdrops */}
       <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] rounded-full bg-purple-600/5 blur-[120px] pointer-events-none" />
-      <div className="absolute top-[20%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/5 blur-[150px] pointer-events-none" />
+      <div className="absolute top-[30%] right-[-10%] w-[600px] h-[600px] rounded-full bg-indigo-600/5 blur-[150px] pointer-events-none" />
 
-      {/* Main Container */}
-      <div className="w-full max-w-3xl flex flex-col gap-8 z-10">
-        
-        {/* Header */}
-        <header className="flex flex-col items-center text-center gap-3">
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/5 text-purple-400 text-xs font-medium tracking-wide">
-            <Sparkles className="w-3.5 h-3.5" />
-            AI Resume Analyzer & ATS Optimizer
+      {/* Top Navbar Header */}
+      <header className="w-full border-b border-neutral-900 bg-neutral-950/60 backdrop-blur-md sticky top-0 z-50 transition-all duration-300">
+        <div className="max-w-4xl mx-auto px-6 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neutral-50 to-neutral-200 flex items-center gap-1.5">
+              Nexume
+              <span className="w-1.5 h-1.5 rounded-full bg-purple-500 animate-pulse" />
+            </span>
           </div>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neutral-50 via-neutral-200 to-purple-400">
-            Nexume
-          </h1>
-          <p className="text-neutral-400 max-w-md text-sm sm:text-base">
-            Upload your resume, parse structural text with PyMuPDF, and receive detailed AI analysis via the Gemini engine.
-          </p>
-        </header>
 
-        {/* Integration Status Banner */}
-        <section className="bg-neutral-900/40 backdrop-blur-xl border border-neutral-800 rounded-2xl p-5 flex flex-col gap-4 shadow-xl">
-          <div className="flex items-center justify-between border-b border-neutral-800 pb-3">
-            <h2 className="text-sm font-semibold flex items-center gap-2 text-neutral-300">
-              <Terminal className="w-4 h-4 text-purple-400" />
-              API Server Status
-            </h2>
+          {uploadResult && (
             <Button
-              onClick={verifyHealth}
-              disabled={loadingHealth}
+              onClick={handleReset}
               variant="outline"
               size="sm"
-              className="h-8 px-2.5 text-xs border-neutral-800 bg-neutral-950/40 hover:bg-neutral-850 hover:text-white"
+              className="h-8 px-3 text-xs border-neutral-800 bg-neutral-900/50 hover:bg-neutral-800 hover:text-white transition-all duration-200"
             >
-              <RefreshCw className={`w-3 h-3 mr-1.5 ${loadingHealth ? 'animate-spin' : ''}`} />
-              Re-check
+              <RotateCcw className="w-3.5 h-3.5 mr-1.5" />
+              Analyze Another Resume
             </Button>
-          </div>
+          )}
+        </div>
+      </header>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="bg-neutral-950/40 rounded-xl p-3 border border-neutral-850 flex flex-col gap-1">
-              <span className="text-[10px] text-neutral-500 font-semibold tracking-wider uppercase">Connection</span>
-              {loadingHealth ? (
-                <div className="flex items-center gap-1.5 text-neutral-400">
-                  <div className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
-                  <span className="text-xs font-medium">Checking...</span>
-                </div>
-              ) : healthError ? (
-                <div className="flex items-center gap-1.5 text-rose-400">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  <span className="text-xs font-semibold">Offline</span>
-                </div>
-              ) : (
-                <div className="flex items-center gap-1.5 text-emerald-400">
-                  <CheckCircle className="w-3.5 h-3.5" />
-                  <span className="text-xs font-semibold">Online</span>
-                </div>
-              )}
-            </div>
-
-            <div className="bg-neutral-950/40 rounded-xl p-3 border border-neutral-850 flex flex-col gap-1">
-              <span className="text-[10px] text-neutral-500 font-semibold tracking-wider uppercase">Active Instance</span>
-              {loadingHealth ? (
-                <span className="text-xs text-neutral-500 font-mono">Querying...</span>
-              ) : health ? (
-                <span className="text-xs text-neutral-300 font-mono">
-                  {health.service} (v{health.version})
-                </span>
-              ) : (
-                <span className="text-xs text-rose-400 font-mono">Unreachable</span>
-              )}
-            </div>
-          </div>
-        </section>
-
-        {/* Upload Container (Hidden if analysis result is available) */}
-        <main className="flex flex-col gap-6">
-          {!uploadResult && (
-            <section className="bg-neutral-900/30 border border-neutral-800 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl">
-              <div className="flex flex-col gap-1">
-                <h2 className="text-lg font-bold text-neutral-200">Resume File Upload</h2>
-                <p className="text-xs text-neutral-500">Upload your PDF resume to run the AI compatibility analysis.</p>
+      {/* Main Content Area */}
+      <main className="w-full max-w-3xl px-6 mt-12 flex flex-col gap-10 z-10 transition-all duration-500">
+        
+        {/* Landing Page Content (Hero + Upload + Features + Footer) */}
+        {!uploadResult && (
+          <div className="flex flex-col gap-10 animate-slide-up">
+            
+            {/* SaaS Hero Section */}
+            <section className="flex flex-col items-center text-center gap-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full border border-purple-500/20 bg-purple-500/5 text-purple-400 text-xs font-semibold tracking-wide shadow-[0_0_15px_rgba(168,85,247,0.05)]">
+                <Sparkles className="w-3.5 h-3.5" />
+                Powered by Gemini AI
               </div>
+              <h2 className="text-4xl sm:text-5xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-neutral-50 via-neutral-100 to-neutral-350">
+                AI Resume Analyzer & ATS Optimizer
+              </h2>
+              <p className="text-neutral-400 max-w-xl text-sm sm:text-base leading-relaxed">
+                Upload your resume and receive AI-powered recruiter feedback, ATS scoring, missing skills analysis, and personalized recommendations in seconds.
+              </p>
+            </section>
 
+            {/* Upload Box Card */}
+            <section className="bg-neutral-900/20 border border-neutral-850 rounded-2xl p-6 flex flex-col gap-6 shadow-2xl backdrop-blur-md">
               <ResumeUpload 
                 onUploadStart={handleUploadStart}
                 onUploadSuccess={handleUploadSuccess}
@@ -170,55 +97,90 @@ function App() {
               />
 
               {uploadError && (
-                <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-xl flex items-start gap-2.5 text-xs">
+                <div className="p-3 bg-rose-500/5 border border-rose-500/20 text-rose-400 rounded-xl flex items-start gap-2.5 text-xs animate-fade-in">
                   <AlertCircle className="w-4 h-4 mt-0.5 shrink-0" />
                   <span className="leading-relaxed">{uploadError}</span>
                 </div>
               )}
             </section>
-          )}
 
-          {/* Recruiter Review Dashboard Section */}
-          {uploadResult && (
+            {/* Premium SaaS Feature Cards */}
+            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <div className="bg-neutral-900/10 hover:bg-neutral-900/30 border border-neutral-850 hover:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                <div className="p-2 w-fit rounded-lg bg-neutral-950 border border-neutral-850 text-purple-400 group-hover:border-purple-500/20 transition-all">
+                  <FileText className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-xs text-neutral-200">Smart PDF Parsing</h3>
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  PyMuPDF extracts clean structured text from your resume.
+                </p>
+              </div>
+
+              <div className="bg-neutral-900/10 hover:bg-neutral-900/30 border border-neutral-850 hover:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                <div className="p-2 w-fit rounded-lg bg-neutral-950 border border-neutral-850 text-purple-400 group-hover:border-purple-500/20 transition-all">
+                  <Cpu className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-xs text-neutral-200">AI Resume Review</h3>
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Gemini analyzes your resume like an experienced recruiter.
+                </p>
+              </div>
+
+              <div className="bg-neutral-900/10 hover:bg-neutral-900/30 border border-neutral-850 hover:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                <div className="p-2 w-fit rounded-lg bg-neutral-950 border border-neutral-850 text-purple-400 group-hover:border-purple-500/20 transition-all">
+                  <TrendingUp className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-xs text-neutral-200">ATS Compatibility</h3>
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Receive an ATS score and identify missing keywords.
+                </p>
+              </div>
+
+              <div className="bg-neutral-900/10 hover:bg-neutral-900/30 border border-neutral-850 hover:border-neutral-800 rounded-xl p-5 flex flex-col gap-3 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg group">
+                <div className="p-2 w-fit rounded-lg bg-neutral-950 border border-neutral-850 text-purple-400 group-hover:border-purple-500/20 transition-all">
+                  <Sparkles className="w-4 h-4" />
+                </div>
+                <h3 className="font-bold text-xs text-neutral-200">Actionable Recommendations</h3>
+                <p className="text-[11px] text-neutral-400 leading-relaxed">
+                  Get practical improvements to increase interview chances.
+                </p>
+              </div>
+
+            </section>
+
+            {/* Secure processing Footer */}
+            <footer className="text-center text-[10px] text-neutral-600 border-t border-neutral-950 pt-8 flex items-center justify-center gap-1.5 font-medium">
+              <Shield className="w-3.5 h-3.5 text-neutral-700" />
+              Your resume is processed securely and never stored permanently.
+            </footer>
+
+          </div>
+        )}
+
+        {/* Dashboard Results (Hides landing page blocks on success) */}
+        {uploadResult && (
+          <div className="animate-fade-in">
             <ResumeAnalysisDashboard 
               resume={uploadResult.resume}
               analysis={uploadResult.analysis}
-              onReset={handleReset}
             />
-          )}
+          </div>
+        )}
 
-          {/* Clean Architecture Preview Section */}
-          {!uploadResult && !isProcessing && (
-            <section className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="bg-neutral-900/20 border border-neutral-850 rounded-xl p-5 flex flex-col gap-3">
-                <div className="p-2 w-fit rounded-lg bg-purple-500/10 border border-purple-500/20 text-purple-400">
-                  <FileText className="w-4 h-4" />
-                </div>
-                <h3 className="font-semibold text-xs text-neutral-200">PDFExtractor (PyMuPDF)</h3>
-                <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Processes and validates PDF structures inside a dedicated utility package without polluting services or routes.
-                </p>
-              </div>
-
-              <div className="bg-neutral-900/20 border border-neutral-850 rounded-xl p-5 flex flex-col gap-3">
-                <div className="p-2 w-fit rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
-                  <Cpu className="w-4 h-4" />
-                </div>
-                <h3 className="font-semibold text-xs text-neutral-200">Isolate AI Pipeline</h3>
-                <p className="text-[11px] text-neutral-400 leading-relaxed">
-                  Decoupled layers preserve separation between extraction parsing logic and Gemini processing structures.
-                </p>
-              </div>
-            </section>
-          )}
-        </main>
-
-        {/* Footer */}
-        <footer className="mt-8 text-center text-[11px] text-neutral-600 border-t border-neutral-900 pt-6">
-          Nexume Architecture Stack: React, Vite, TS, Tailwind CSS v4, shadcn/ui & FastAPI, Pydantic
-        </footer>
-      </div>
+      </main>
     </div>
+  )
+}
+
+// AlertCircle local definition or import
+function AlertCircle({ className }: { className?: string }) {
+  return (
+    <svg className={className} xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="12" y1="8" x2="12" y2="12" />
+      <line x1="12" y1="16" x2="12.01" y2="16" />
+    </svg>
   )
 }
 
