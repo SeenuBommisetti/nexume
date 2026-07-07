@@ -8,7 +8,7 @@ class Settings(BaseSettings):
     API_V1_STR: str = "/api/v1"
     
     # CORS Origins: Accepts a list or a comma-separated string in env
-    BACKEND_CORS_ORIGINS: Union[List[str], str] = ["http://localhost:5173", "http://localhost:3000", "https://nexume.onrender.com"]
+    BACKEND_CORS_ORIGINS: Union[List[str], str] = ["http://localhost:5173", "http://localhost:3000", "https://nexumeweb.vercel.app"]
 
     @field_validator("BACKEND_CORS_ORIGINS", mode="before")
     @classmethod
